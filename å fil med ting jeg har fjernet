@@ -1,0 +1,11 @@
+
+if len(self.eple_group) < 1:
+    self.eple.wait += 1
+    if self.eple.wait >= 60:
+        self.eple = BadEple()
+        self.eple_group.add(self.eple)
+        self.all_sprites.add(self.eple)
+        self.eple.wait = 0
+
+
+eple_img = pg.transform.scale(eple_img,(36,36))
