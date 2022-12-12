@@ -32,6 +32,8 @@ class Game():
         self.all_sprites = pg.sprite.Group()
         self.eple_group = pg.sprite.Group()
         self.projectiles_grp = pg.sprite.Group()
+        self.attack1_group = pg.sprite.Group()
+        self.attack2_group = pg.sprite.Group()
         self.hurt_group = pg.sprite.Group()
         self.food_group = pg.sprite.Group()
 
@@ -44,21 +46,19 @@ class Game():
 
         self.eple = BadEple()
 
-
-        self.test = test()
-
         self.bush_group.add(self.bush)
         self.bushgull_group.add(self.bushgull)
         self.eple_group.add(self.eple)
 
         self.hurt_group.add(self.bush, self.bushgull, self.eple)
     
-        self.all_sprites.add(self.bush, self.tre, self.jony, self.jeffy, self.eple, self.bushgull, self.test)
+        self.all_sprites.add(self.bush, self.tre, self.jony, self.jeffy, self.eple, self.bushgull)
 
         self.text_hp1 = self.SANS_Undertale30.render("Jeffrey:" + str(self.jeffy.life), False, (self.RED))
         self.text_hp2 = self.SANS_Undertale30.render("Johnny:" + str(self.jony.life), False, (self.BLUE))
 
         self.eple_timer = 0
+        self.attack2 = True
 
         self.run()
 
@@ -75,7 +75,7 @@ class Game():
                         playing = False
                         self.new()
 
-                    if event.key == pg.K_8:
+                    if event.key == [pg.K_8]:
                         self.jeffy.life = 99999
                         self.text_hp1 = self.SANS_Undertale30.render("Jeffrey:" + str(self.jeffy.life), False, self.RED)
                         self.jony.life = 99999
@@ -87,18 +87,18 @@ class Game():
                 if event.type == pg.KEYUP:
                     if event.key == pg.K_TAB:
                         self.FPS = 120
-
+            
 
             self.screen.blit(self.bg,(0,0))
 
-
             self.all_sprites.update()
-
 
             hits = pg.sprite.spritecollide(self.jeffy, self.hurt_group,True)
             hits2 = pg.sprite.spritecollide(self.jony, self.hurt_group,True)
             food_hit = pg.sprite.spritecollide(self.jeffy, self.food_group, True)
             food_hit2 = pg.sprite.spritecollide(self.jony, self.food_group, True)
+
+            pg.sprite.groupcollide(self.projectiles_grp, self.hurt_group,True, True)
 
             if food_hit:
                 food_hit[0].give_health()
@@ -133,6 +133,11 @@ class Game():
             if self.jeffy.life <= 0 and self.jony.life <= 0:
                 playing = False
                 self.new()
+
+            if len(self.attack2_group) <= 0:
+                self.attack2 = True
+            else:
+                self.attack2 = False
 
 
             # når mindre enn x busker er på skjermen kommer en ny en
