@@ -54,11 +54,16 @@ class Game():
     
         self.all_sprites.add(self.bush, self.tre, self.jony, self.jeffy, self.eple, self.bushgull)
 
-        self.text_hp1 = self.SANS_Undertale30.render("Jeffrey:" + str(self.jeffy.life), False, (self.RED))
-        self.text_hp2 = self.SANS_Undertale30.render("Johnny:" + str(self.jony.life), False, (self.BLUE))
+        self.jeffy_poeng = 0
+        self.jony_poeng = 0
+
+        self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
+        self.text_hp2 = self.SANS_Undertale30.render("Johnny:" + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
         self.eple_timer = 0
         self.attack2 = True
+
+        self.poeng_timer = 0
 
         self.run()
 
@@ -75,11 +80,11 @@ class Game():
                         playing = False
                         self.new()
 
-                    if event.key == [pg.K_8]:
+                    if event.key == pg.K_8:
                         self.jeffy.life = 99999
-                        self.text_hp1 = self.SANS_Undertale30.render("Jeffrey:" + str(self.jeffy.life), False, self.RED)
+                        self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
                         self.jony.life = 99999
-                        self.text_hp2 = self.SANS_Undertale30.render("Johnny:" + str(self.jony.life), False, self.BLUE)
+                        self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
                     if event.key == pg.K_TAB:
                         self.FPS = 12000
@@ -87,58 +92,83 @@ class Game():
                 if event.type == pg.KEYUP:
                     if event.key == pg.K_TAB:
                         self.FPS = 120
-            
 
             self.screen.blit(self.bg,(0,0))
 
             self.all_sprites.update()
 
-            hits = pg.sprite.spritecollide(self.jeffy, self.hurt_group,True)
-            hits2 = pg.sprite.spritecollide(self.jony, self.hurt_group,True)
+            hits = pg.sprite.spritecollide(self.jeffy, self.hurt_group,False)
+            hits2 = pg.sprite.spritecollide(self.jony, self.hurt_group,False)
             food_hit = pg.sprite.spritecollide(self.jeffy, self.food_group, True)
             food_hit2 = pg.sprite.spritecollide(self.jony, self.food_group, True)
+
+            poeng1 = pg.sprite.groupcollide(self.attack1_group, self.hurt_group, True, True)
+            poeng2 = pg.sprite.groupcollide(self.attack2_group, self.hurt_group, True, True)
 
             pg.sprite.groupcollide(self.projectiles_grp, self.hurt_group,True, True)
 
             if food_hit:
                 food_hit[0].give_health()
-                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey:" + str(self.jeffy.life), False, self.RED)
+                self.jeffy_poeng += 25
+                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
 
             if food_hit2:
                 food_hit2[0].give_health2()
-                self.text_hp2 = self.SANS_Undertale30.render("Johnny:" + str(self.jony.life), False, self.BLUE)
+                self.jony_poeng += 10
+                self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
-            if hits:
+            if hits and self.jeffy.hurtTimer <= 0:
                 self.jeffy.life -= 1
-                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey:" + str(self.jeffy.life), False, self.RED)
-
+                self.jeffy_poeng -= 5
+                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
 
             if self.jeffy.life <= 0:
                 self.jeffy.kill()
+                self.jeffy_poeng = 0
                 self.jeffy = Player(self)
                 self.all_sprites.add(self.jeffy)
-                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey:" + str(self.jeffy.life), False, self.RED)
+                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
 
-            if hits2:
+            if hits2 and self.jony.hurtTimer <= 0:
                 self.jony.life -=1
-                self.text_hp2 = self.SANS_Undertale30.render("Johnny:" + str(self.jony.life), False, self.BLUE)
+                self.jony_poeng -= 5
+                self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
             if self.jony.life <= 0:
                 self.jony.kill()
+                self.jony_poeng = 0
                 self.jony = Player2(self)
                 self.all_sprites.add(self.jony)
-                self.text_hp2 = self.SANS_Undertale30.render("Johnny:" + str(self.jony.life), False, self.BLUE)
+                self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
 
             if self.jeffy.life <= 0 and self.jony.life <= 0:
                 playing = False
                 self.new()
 
-            if len(self.attack2_group) <= 0:
-                self.attack2 = True
-            else:
-                self.attack2 = False
+            if poeng1:
+                self.jeffy_poeng += 15
+                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
+            
+            if poeng2:
+                self.jony_poeng += 15
+                self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
+            
+            if self.poeng_timer > 240:
+                self.poeng_timer = 0
+                self.jeffy_poeng += 5
+                self.jony_poeng += 5
+                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
+                self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
+            if self.jeffy_poeng < 0:
+                self.jeffy_poeng = 0
+                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
+            if self.jony_poeng < 0:
+                self.jony_poeng = 0
+                self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
+
+            self.poeng_timer += 1
 
             # når mindre enn x busker er på skjermen kommer en ny en
             if len(self.bush_group) < 5:

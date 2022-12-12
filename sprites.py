@@ -28,7 +28,6 @@ playerWalk2 = pg.transform.scale(playerWalk2,(player_width,player_height)) #stø
 playerWalk2_right = pg.transform.flip(playerWalk2, True, False)
 
 
-
 player2_img = pg.image.load("Johnny.png")
 player2_img = pg.transform.scale(player2_img,(player_width,player_height)) #Størrelse på andre bildet
 player2_right_img = pg.transform.flip(player2_img, True, False)
@@ -45,6 +44,12 @@ player2Walk2_right = pg.transform.flip(player2Walk2, True, False)
 playerHurt = pg.image.load("PlayerHurt.png")
 playerHurt = pg.transform.scale(playerHurt,(player_width,player_height))
 playerHurt_right = pg.transform.flip(playerHurt, True, False)
+
+attack1_img = pg.image.load("Attack1.png")
+attack1_img = pg.transform.scale(attack1_img,(36,36))
+
+attack2_img = pg.image.load("Attack2.png")
+attack2_img = pg.transform.scale(attack2_img,(36,36))
 
 kylling_img = pg.image.load("Kylling.png")
 kylling_img = pg.transform.scale(kylling_img,(player_width,player_width))
@@ -105,7 +110,7 @@ class Player(pg.sprite.Sprite):
 
 
         self.rect = self.image.get_rect() #henter self.image sin størrelse og rektangel
-        self.pos = vec(100,100)
+        self.pos = vec(150,150)
         self.rect.center = self.pos
         self.speed = player_speed
 
@@ -168,13 +173,13 @@ class Player(pg.sprite.Sprite):
             self.attack_direction_x = self.projectile_speed
             self.attack_direction_y = 0
 
-        # attack som man ikke bare kan holde inee å få en stråle
-        if self.attack_delay >0:
+        # attack som man ikke bare kan holde inne å få en stråle
+        if self.attack_delay > 0:
             self.attack_delay -= 1
 
         if keys[pg.K_f]:
             self.speed = 1
-            if self.attack_delay <= 0:
+            if self.attack_delay <= 0 or len(self.game.attack1_group) <= 0:
                 self.attack_delay = 100
                 self.attack()
         else:
@@ -217,6 +222,7 @@ class Player(pg.sprite.Sprite):
                 self.hurtRight = True
         if self.hurtsies >= 1:
             self.hurtTimer += 1
+            self.speed = 2
             if self.last_direct == 1:
                 self.hurt = True
                 self.hurtRight = False
@@ -298,7 +304,7 @@ class Player2(pg.sprite.Sprite):
         self.image = player2_img
 
         self.rect = self.image.get_rect() #henter self.image sin størrelse og rektangel
-        self.pos = vec(WIDTH-100,HEIGHT-100)
+        self.pos = vec(WIDTH-150,HEIGHT-150)
         self.rect.center = self.pos
         self.speed = player_speed
 
@@ -366,7 +372,7 @@ class Player2(pg.sprite.Sprite):
 
         if keys[pg.K_RCTRL]:
             self.speed = 1
-            if self.attack_delay <= 0:
+            if self.attack_delay <= 0 or len(self.game.attack2_group) <= 0:
                 self.attack_delay = 100
                 self.attack()
         else:
@@ -407,13 +413,14 @@ class Player2(pg.sprite.Sprite):
                 self.hurtRight = True
         if self.hurtsies >= 1:
             self.hurtTimer += 1
+            self.speed = 2
             if self.last_direct == 1:
                 self.hurt = True
                 self.hurtRight = False
             if self.last_direct == 2:
                 self.hurtRight = True
                 self.hurt = False
-        if self.oldlife == self.life and self.hurtTimer > 60:
+        if self.oldlife == self.life and self.hurtTimer > 80:
             self.hurt = False
             self.hurtRight = False
             self.hurtTimer = 0
@@ -455,7 +462,6 @@ class Player2(pg.sprite.Sprite):
             self.rect = self.image.get_rect()
 
         if self.hurt:
-            
             self.image = playerHurt
             self.rect = self.image.get_rect()
         
@@ -699,27 +705,38 @@ class BadEple(pg.sprite.Sprite):
 
 class Ranged_attack(pg.sprite.Sprite):
     def __init__(self, game, x ,y, direction_x, direction_y):
-        self.groups = game.all_sprites, game.projectiles_grp,  # legger til i sprite gruppe
+        self.groups = game.all_sprites, game.projectiles_grp, game.attack1_group  # legger til i sprite gruppe
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface([50,50])
-        self.image.fill(game.RED)
+        self.image = attack1_img
+        self.orig_img = self.image
         self.rect = self.image.get_rect()
         self.pos = vec(x, y) # start posisjon
         self.direction_x = direction_x
         self.direction_y = direction_y
         self.rect.center = self.pos
+
+        self.angle = 1
+        self.angle_speed = 1
  
     def update(self):
         self.rect.center = self.pos
+        self.angle += self.angle_speed
         self.pos.x += self.direction_x
         self.pos.y += self.direction_y
+
+        self.image, self.rect = self.rot_center(self.orig_img, self.angle, self.pos.x, self.pos.y)
 
         if self.pos.x > WIDTH+50 or self.pos.x < -50:
             self.kill()
         if self.pos.y > HEIGHT+50 or self.pos.y < -50:
             self.kill()
 
+    def rot_center(self, image, angle, x, y):
+        rotated_image = pg.transform.rotate(image, angle)
+        self.new_rect = rotated_image.get_rect(center = self.image.get_rect(center = (x,y)).center)
+
+        return rotated_image, self.new_rect
 
 
 class Ranged_attack2(pg.sprite.Sprite):
@@ -727,23 +744,35 @@ class Ranged_attack2(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.projectiles_grp, game.attack2_group # legger til i sprite gruppe
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface([50,50])
-        self.image.fill(game.BLUE)
+        self.image = attack2_img
+        self.orig_img = self.image
         self.rect = self.image.get_rect()
         self.pos = vec(x, y) # start posisjon
         self.direction_x = direction_x
         self.direction_y = direction_y
         self.rect.center = self.pos
+
+        self.angle = 1
+        self.angle_speed = 1
  
     def update(self):
         self.rect.center = self.pos
+        self.angle += self.angle_speed
         self.pos.x += self.direction_x
         self.pos.y += self.direction_y
+
+        self.image, self.rect = self.rot_center(self.orig_img, self.angle, self.pos.x, self.pos.y)
 
         if self.pos.x > WIDTH+50 or self.pos.x < -50:
             self.kill()
         if self.pos.y > HEIGHT+50 or self.pos.y < -50:
             self.kill()
+
+    def rot_center(self, image, angle, x, y):
+        rotated_image = pg.transform.rotate(image, angle)
+        self.new_rect = rotated_image.get_rect(center = self.image.get_rect(center = (x,y)).center)
+
+        return rotated_image, self.new_rect
 
 
 class LittMat(pg.sprite.Sprite):
@@ -760,7 +789,7 @@ class LittMat(pg.sprite.Sprite):
         self.rect.center = self.pos
  
     def give_health(self):
-        self.game.jeffy.life += 2
+        self.game.jeffy.life += 1
 
     def give_health2(self):
-        self.game.jony.life += 2
+        self.game.jony.life += 1
