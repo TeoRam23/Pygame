@@ -175,18 +175,6 @@ class Player(pg.sprite.Sprite):
             self.attack_direction_x = self.projectile_speed
             self.attack_direction_y = 0
 
-        # attack som man ikke bare kan holde inne å få en stråle
-        if self.attack_delay > 0:
-            self.attack_delay -= 1
-
-        if keys[pg.K_f]:
-            self.speed = 1
-            if self.attack_delay <= 0 or len(self.game.attack1_group) <= 0:
-                self.attack_delay = 100
-                self.attack()
-        else:
-            self.speed = player_speed
-
 
         #out of bounds
         if self.pos.x >= WIDTH-(player_width/2):
@@ -238,6 +226,18 @@ class Player(pg.sprite.Sprite):
             self.hurtsies = 0
 
         self.oldlife = self.life
+
+        # attack som man ikke bare kan holde inne å få en stråle
+        if self.attack_delay > 0:
+            self.attack_delay -= 1
+
+        if keys[pg.K_f]:
+            self.speed = 1
+            if self.attack_delay <= 0 or len(self.game.attack1_group) <= 0:
+                self.attack_delay = 100
+                self.attack()
+        else:
+            self.speed = player_speed
 
     def attack(self):
         attack_obj = Ranged_attack(self.game, self.pos.x, self.pos.y, self.attack_direction_x, self.attack_direction_y)
@@ -370,18 +370,6 @@ class Player2(pg.sprite.Sprite):
             self.attack_direction_x = self.projectile_speed
             self.attack_direction_y = 0
 
-
-        if self.attack_delay >0:
-            self.attack_delay -= 1
-
-        if keys[pg.K_RCTRL]:
-            self.speed = 1
-            if self.attack_delay <= 0 or len(self.game.attack2_group) <= 0:
-                self.attack_delay = 100
-                self.attack()
-        else:
-            self.speed = player_speed   
-
         #andre out of bounds
         if self.pos.x >= WIDTH-(player_width/2):
             self.pos.x = WIDTH-(player_width/2)
@@ -432,6 +420,17 @@ class Player2(pg.sprite.Sprite):
 
         self.oldlife = self.life
 
+        # attack som man ikke bare kan holde inne å få en stråle
+        if self.attack_delay >0:
+            self.attack_delay -= 1
+
+        if keys[pg.K_RCTRL]:
+            self.speed = 1
+            if self.attack_delay <= 0 or len(self.game.attack2_group) <= 0:
+                self.attack_delay = 100
+                self.attack()
+        else:
+            self.speed = player_speed   
 
     def animate(self):
         now = pg.time.get_ticks()

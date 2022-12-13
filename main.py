@@ -32,16 +32,16 @@ class Game():
         self.start()
 
     def start(self): # strarten av spillet
-        choose = True
+        press_space = True
         start_game = False
-        while choose:
+        while press_space:
             self.clock.tick(self.FPS)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
-                    choose = False
+                    press_space = False
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_SPACE:
-                        choose = False
+                        press_space = False
                         start_game = True
             
             self.screen.blit(self.start_screen,(0,0))
@@ -86,7 +86,7 @@ class Game():
 
         self.hurt_group.add(self.bush, self.bushgull, self.eple)
     
-        self.all_sprites.add(self.bush, self.tre, self.jony, self.jeffy, self.eple, self.bushgull)
+        self.all_sprites.add(self.bush, self.tre, self.eple, self.bushgull)
 
         self.jeffy_poeng = 0
         self.jony_poeng = 0
@@ -113,12 +113,18 @@ class Game():
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_r:
                         playing = False
-                        self.new()
+                        self.show_poeng = False
+                        self.start()
 
                     if event.key == pg.K_8:
+                        if self.jeffy.death:
+                            self.jeffy.death = False
+                            self.jeffy = Player(self)
                         self.jeffy.life = 99999
                         self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
-                        self.jeffy.death = False
+                        if self.jony.death:
+                            self.jony.death = False
+                            self.jony = Player2(self)
                         self.jony.life = 99999
                         self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
