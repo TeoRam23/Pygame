@@ -95,6 +95,8 @@ class Player(pg.sprite.Sprite):
         self.current_frame = 0
         self.last_update = 0
 
+        self.death = False
+
         self.standing = True
         self.standingRight = False
         self.walkingLeft = False
@@ -289,6 +291,8 @@ class Player2(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.current_frame = 0
         self.last_update = 0
+
+        self.death = False
 
         self.standing = True
         self.standingRight = False
