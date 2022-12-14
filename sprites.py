@@ -235,6 +235,7 @@ class Player(pg.sprite.Sprite):
             self.speed = 1
             if self.attack_delay <= 0 or len(self.game.attack1_group) <= 0:
                 self.attack_delay = 100
+                pg.mixer.Sound.play(self.game.zap_sound)
                 self.attack()
         else:
             self.speed = player_speed
@@ -428,6 +429,7 @@ class Player2(pg.sprite.Sprite):
             self.speed = 1
             if self.attack_delay <= 0 or len(self.game.attack2_group) <= 0:
                 self.attack_delay = 100
+                pg.mixer.Sound.play(self.game.zap_sound)
                 self.attack()
         else:
             self.speed = player_speed   
@@ -563,6 +565,7 @@ class EnemyBush(pg.sprite.Sprite):
 class EnemyBushGull(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
+
         self.current_frame = 0
         self.last_update = 0
 

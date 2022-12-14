@@ -19,6 +19,18 @@ class Game():
         self.kant = pg.image.load("Kant.png").convert_alpha()
         self.kant = pg.transform.scale(self.kant,(WIDTH, HEIGHT))
 
+        self.hurt_sound = pg.mixer.Sound("hurt.wav")
+        self.hurt_sound.set_volume(0.5) 
+
+        self.eat_sound = pg.mixer.Sound("eat.wav")
+        self.eat_sound.set_volume(0.5)
+
+        self.zap_sound = pg.mixer.Sound("zap.wav")
+        self.zap_sound.set_volume(0.5)
+
+        self.bush_sound = pg.mixer.Sound("bush_sound.wav")
+        self.bush_sound.set_volume(0.5)
+
         self.start_screen = pg.image.load("Start.png").convert_alpha()
         self.start_screen = pg.transform.scale(self.start_screen,(WIDTH, HEIGHT))
         self.show_poeng = False
@@ -31,7 +43,7 @@ class Game():
         
         self.start()
 
-    def start(self): # strarten av spillet
+    def start(self): # strarten av spillet og vises etter at man dør
         press_space = True
         start_game = False
         while press_space:
@@ -50,8 +62,15 @@ class Game():
                 self.score_board1 = self.SANS_Undertale30.render("Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
                 self.score_board2 = self.SANS_Undertale30.render("Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
 
-                self.screen.blit(self.score_board1, (WIDTH/3,HEIGHT/2+85))
-                self.screen.blit(self.score_board2, (WIDTH/3,HEIGHT/2+125))
+                self.screen.blit(self.score_board1, (WIDTH/3,HEIGHT/2+100))
+                self.screen.blit(self.score_board2, (WIDTH/3,HEIGHT/2+150))
+            
+            if self.show_poeng == False:
+                self.score_board1 = self.SANS_Undertale30.render("Jeffrey kontroll: WASD | F = skyt ball", False, (self.RED))
+                self.score_board2 = self.SANS_Undertale30.render("Jony kontroll: piltaster | ctrlR = shyt ball", False, (self.BLUE))
+                self.screen.blit(self.score_board1, (150,HEIGHT/2+100))
+                self.screen.blit(self.score_board2, (120,HEIGHT/2+150))
+
 
             pg.display.update()
 
@@ -63,6 +82,7 @@ class Game():
     def new(self): # ny runde
         self.bush_group = pg.sprite.Group()
         self.bushgull_group = pg.sprite.Group()
+        self.bush_group_full = pg.sprite.Group()
         self.all_sprites = pg.sprite.Group()
         self.eple_group = pg.sprite.Group()
         self.projectiles_grp = pg.sprite.Group()
@@ -70,6 +90,8 @@ class Game():
         self.attack2_group = pg.sprite.Group()
         self.hurt_group = pg.sprite.Group()
         self.food_group = pg.sprite.Group()
+
+        self.player_group_full = pg.sprite.Group()
 
         self.jony = Player2(self)
         self.jeffy = Player(self)
@@ -82,6 +104,7 @@ class Game():
 
         self.bush_group.add(self.bush)
         self.bushgull_group.add(self.bushgull)
+        self.bush_group_full.add(self.bush, self.bushgull)
         self.eple_group.add(self.eple)
 
         self.hurt_group.add(self.bush, self.bushgull, self.eple)
@@ -144,6 +167,8 @@ class Game():
             food_hit = pg.sprite.spritecollide(self.jeffy, self.food_group, True)
             food_hit2 = pg.sprite.spritecollide(self.jony, self.food_group, True)
 
+            bush_hit = pg.sprite.groupcollide(self.projectiles_grp, self.bush_group_full, False, False)
+
             poeng1 = pg.sprite.groupcollide(self.attack1_group, self.hurt_group, True, True)
             poeng2 = pg.sprite.groupcollide(self.attack2_group, self.hurt_group, True, True)
 
@@ -151,17 +176,20 @@ class Game():
 
             if food_hit and self.jeffy.death == False:
                 food_hit[0].give_health()
-                self.jeffy_poeng += 25
+                self.jeffy_poeng += 10
+                pg.mixer.Sound.play(self.eat_sound)
                 self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
 
             if food_hit2 and self.jony.death == False:
                 food_hit2[0].give_health2()
                 self.jony_poeng += 10
+                pg.mixer.Sound.play(self.eat_sound)
                 self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
             if hits and self.jeffy.hurtTimer <= 0 and self.jeffy.death == False:
                 self.jeffy.life -= 1
                 self.jeffy_poeng -= 5
+                pg.mixer.Sound.play(self.hurt_sound)
                 self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
 
             if self.jeffy.life <= 0:
@@ -172,6 +200,7 @@ class Game():
             if hits2 and self.jony.hurtTimer <= 0 and self.jony.death == False:
                 self.jony.life -=1
                 self.jony_poeng -= 5
+                pg.mixer.Sound.play(self.hurt_sound)
                 self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
             if self.jony.life <= 0:
@@ -195,6 +224,7 @@ class Game():
                 self.jony_poeng += 15
                 self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
             
+            # hvert 240 tick får man 5 poeng
             if self.poeng_timer > 240:
                 self.poeng_timer = 0
                 if self.jeffy.death == False:
@@ -202,7 +232,7 @@ class Game():
                     self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
                 self.jony_poeng += 5
                 self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
-
+            # når man har mindre enn 0 poeng får man 0 poeng sånn at man ikke kan ha mindre enn 0 poeng
             if self.jeffy_poeng < 0:
                 self.jeffy_poeng = 0
                 self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
@@ -213,10 +243,11 @@ class Game():
             self.poeng_timer += 1
 
 
-            # når mindre enn x busker er på skjermen kommer en ny en
+            # når mindre enn 5 busker er på skjermen kommer en ny en
             if len(self.bush_group) < 5:
                 self.bush = EnemyBush(self)
                 self.bush_group.add(self.bush)
+                self.bush_group_full.add(self.bush)
                 self.hurt_group.add(self.bush)
                 self.all_sprites.add(self.bush)
 
@@ -225,9 +256,11 @@ class Game():
                 if waitgull == 1:
                     self.bushgull = EnemyBushGull()
                     self.bushgull_group.add(self.bushgull)
+                    self.bush_group_full.add(self.bushgull)
                     self.hurt_group.add(self.bushgull)
                     self.all_sprites.add(self.bushgull)
 
+            # hvert 180 tick spawner et nytt eple
             self.eple_timer += 1
             if self.eple_timer >= 180:
                 self.eple = BadEple()
@@ -235,6 +268,9 @@ class Game():
                 self.hurt_group.add(self.eple)
                 self.all_sprites.add(self.eple)
                 self.eple_timer = 0
+
+            if bush_hit:
+                pg.mixer.Sound.play(self.bush_sound)
 
             self.all_sprites.draw(self.screen)
             self.screen.blit(self.kant,(0,0))
