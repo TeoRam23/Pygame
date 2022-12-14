@@ -167,12 +167,17 @@ class Game():
             food_hit = pg.sprite.spritecollide(self.jeffy, self.food_group, True)
             food_hit2 = pg.sprite.spritecollide(self.jony, self.food_group, True)
 
+            # kan brukes til å få spillerne til å skade hverandre
+            broHit1 = pg.sprite.spritecollide(self.jeffy, self.attack2_group, True)
+            broHit2 = pg.sprite.spritecollide(self.jony, self.attack1_group, True)
+
             bush_hit = pg.sprite.groupcollide(self.projectiles_grp, self.bush_group_full, False, False)
 
             poeng1 = pg.sprite.groupcollide(self.attack1_group, self.hurt_group, True, True)
             poeng2 = pg.sprite.groupcollide(self.attack2_group, self.hurt_group, True, True)
 
             pg.sprite.groupcollide(self.projectiles_grp, self.hurt_group,True, True)
+
 
             if food_hit and self.jeffy.death == False:
                 food_hit[0].give_health()
