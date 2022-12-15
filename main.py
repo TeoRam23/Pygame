@@ -19,11 +19,14 @@ class Game():
         self.kant = pg.image.load("Kant.png").convert_alpha()
         self.kant = pg.transform.scale(self.kant,(WIDTH, HEIGHT))
 
+        pg.mixer.music.load("music_main.wav")
+        pg.mixer.music.set_volume(0.2)
+
         self.hurt_sound = pg.mixer.Sound("sound_hurt.wav")
         self.hurt_sound.set_volume(0.5) 
 
         self.eat_sound = pg.mixer.Sound("sound_eat.wav")
-        self.eat_sound.set_volume(0.4)
+        self.eat_sound.set_volume(0.3)
 
         self.zap_sound = pg.mixer.Sound("sound_zap.wav")
         self.zap_sound.set_volume(0.5)
@@ -59,6 +62,7 @@ class Game():
         press_space = True
         start_game = False
         self.duel = False
+        pg.mixer.music.stop()
         
         while press_space:
             self.clock.tick(self.FPS)
@@ -79,20 +83,20 @@ class Game():
             if self.show_poeng:
                 if self.winner1:
                     self.score_board1 = self.SANS_Undertale30.render("W|Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
-                    self.score_board2 = self.SANS_Undertale30.render("L|Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
+                    self.score_board2 = self.SANS_Undertale30.render("L|Johnny poeng: " + str(self.jony_poeng), False, (self.BLUE))
                 if self.winner2:
                     self.score_board1 = self.SANS_Undertale30.render("L|Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
-                    self.score_board2 = self.SANS_Undertale30.render("W|Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
+                    self.score_board2 = self.SANS_Undertale30.render("W|Johnny poeng: " + str(self.jony_poeng), False, (self.BLUE))
                 if self.winner1 == False and self.winner2 == False:
                     self.score_board1 = self.SANS_Undertale30.render("Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
-                    self.score_board2 = self.SANS_Undertale30.render("Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
+                    self.score_board2 = self.SANS_Undertale30.render("Johnny poeng: " + str(self.jony_poeng), False, (self.BLUE))
 
                 self.screen.blit(self.score_board1, (WIDTH/3,HEIGHT/2+100))
                 self.screen.blit(self.score_board2, (WIDTH/3,HEIGHT/2+150))
             
             if self.show_poeng == False:
                 self.score_board1 = self.SANS_Undertale30.render("Jeffrey kontroll: WASD | F = skyt ball", False, (self.RED))
-                self.score_board2 = self.SANS_Undertale30.render("Jony kontroll: piltaster | ctrlR = shyt ball", False, (self.BLUE))
+                self.score_board2 = self.SANS_Undertale30.render("Johnny kontroll: piltaster | ctrlR = shyt ball", False, (self.BLUE))
                 self.screen.blit(self.score_board1, (150,HEIGHT/2+100))
                 self.screen.blit(self.score_board2, (120,HEIGHT/2+150))
 
@@ -154,6 +158,8 @@ class Game():
     def run(self): # mens man spiller
         playing = True
         self.show_poeng = True
+        pause = False
+        pg.mixer.music.play(-1) 
         while playing:
             self.clock.tick(self.FPS)
             for event in pg.event.get():
