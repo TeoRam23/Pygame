@@ -19,17 +19,29 @@ class Game():
         self.kant = pg.image.load("Kant.png").convert_alpha()
         self.kant = pg.transform.scale(self.kant,(WIDTH, HEIGHT))
 
-        self.hurt_sound = pg.mixer.Sound("hurt.wav")
+        self.hurt_sound = pg.mixer.Sound("sound_hurt.wav")
         self.hurt_sound.set_volume(0.5) 
 
-        self.eat_sound = pg.mixer.Sound("eat.wav")
-        self.eat_sound.set_volume(0.5)
+        self.eat_sound = pg.mixer.Sound("sound_eat.wav")
+        self.eat_sound.set_volume(0.4)
 
-        self.zap_sound = pg.mixer.Sound("zap.wav")
+        self.zap_sound = pg.mixer.Sound("sound_zap.wav")
         self.zap_sound.set_volume(0.5)
 
-        self.bush_sound = pg.mixer.Sound("bush_sound.wav")
-        self.bush_sound.set_volume(0.5)
+        self.bush_sound = pg.mixer.Sound("sound_bush.wav")
+        self.bush_sound.set_volume(0.4)
+
+        self.apple_sound = pg.mixer.Sound("sound_apple.wav")
+        self.apple_sound.set_volume(0.4)
+
+        self.start_sound = pg.mixer.Sound("sound_start.wav")
+        self.start_sound.set_volume(0.5)
+
+        self.death_sound = pg.mixer.Sound("sound_death.wav")
+        self.death_sound.set_volume(0.3)
+
+        self.end_sound = pg.mixer.Sound("sound_end.wav")
+        self.end_sound.set_volume(0.5)
 
         self.start_screen = pg.image.load("Start.png").convert_alpha()
         self.start_screen = pg.transform.scale(self.start_screen,(WIDTH, HEIGHT))
@@ -46,6 +58,8 @@ class Game():
     def start(self): # strarten av spillet og vises etter at man dør
         press_space = True
         start_game = False
+        self.duel = False
+        
         while press_space:
             self.clock.tick(self.FPS)
             for event in pg.event.get():
@@ -55,12 +69,23 @@ class Game():
                     if event.key == pg.K_SPACE:
                         press_space = False
                         start_game = True
+                    if event.key == pg.K_o:
+                        press_space = False
+                        start_game = True
+                        self.duel = True
             
             self.screen.blit(self.start_screen,(0,0))
 
             if self.show_poeng:
-                self.score_board1 = self.SANS_Undertale30.render("Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
-                self.score_board2 = self.SANS_Undertale30.render("Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
+                if self.winner1:
+                    self.score_board1 = self.SANS_Undertale30.render("W|Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
+                    self.score_board2 = self.SANS_Undertale30.render("L|Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
+                if self.winner2:
+                    self.score_board1 = self.SANS_Undertale30.render("L|Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
+                    self.score_board2 = self.SANS_Undertale30.render("W|Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
+                if self.winner1 == False and self.winner2 == False:
+                    self.score_board1 = self.SANS_Undertale30.render("Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
+                    self.score_board2 = self.SANS_Undertale30.render("Jony poeng: " + str(self.jony_poeng), False, (self.BLUE))
 
                 self.screen.blit(self.score_board1, (WIDTH/3,HEIGHT/2+100))
                 self.screen.blit(self.score_board2, (WIDTH/3,HEIGHT/2+150))
@@ -75,6 +100,7 @@ class Game():
             pg.display.update()
 
             if start_game:
+                pg.mixer.Sound.play(self.start_sound)
                 self.new()
             
 
@@ -121,7 +147,8 @@ class Game():
         self.attack2 = True
 
         self.poeng_timer = 0
-
+        self.winner1 = False
+        self.winner2 = False
         self.run()
 
     def run(self): # mens man spiller
@@ -167,17 +194,31 @@ class Game():
             food_hit = pg.sprite.spritecollide(self.jeffy, self.food_group, True)
             food_hit2 = pg.sprite.spritecollide(self.jony, self.food_group, True)
 
-            # kan brukes til å få spillerne til å skade hverandre
-            broHit1 = pg.sprite.spritecollide(self.jeffy, self.attack2_group, True)
-            broHit2 = pg.sprite.spritecollide(self.jony, self.attack1_group, True)
+            # brukes til å få spillerne til å skade hverandre
+            broHit1 = pg.sprite.spritecollide(self.jeffy, self.attack2_group, False, False)
+            broHit2 = pg.sprite.spritecollide(self.jony, self.attack1_group, False, False)
 
             bush_hit = pg.sprite.groupcollide(self.projectiles_grp, self.bush_group_full, False, False)
+            eple_hit = pg.sprite.groupcollide(self.projectiles_grp, self.eple_group, False, False)
 
             poeng1 = pg.sprite.groupcollide(self.attack1_group, self.hurt_group, True, True)
             poeng2 = pg.sprite.groupcollide(self.attack2_group, self.hurt_group, True, True)
 
             pg.sprite.groupcollide(self.projectiles_grp, self.hurt_group,True, True)
 
+            if broHit1 and self.duel and self.jeffy.hurtTimer <= 0 and self.jeffy.death == False:
+                self.jeffy.life -= 1
+                self.jeffy_poeng -= 5
+                self.jony_poeng += 5
+                pg.mixer.Sound.play(self.hurt_sound)
+                self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
+
+            if broHit2 and self.duel and self.jony.hurtTimer <= 0 and self.jony.death == False:
+                self.jony.life -=1
+                self.jony_poeng -= 5
+                self.jeffy_poeng += 5
+                pg.mixer.Sound.play(self.hurt_sound)
+                self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
 
             if food_hit and self.jeffy.death == False:
                 food_hit[0].give_health()
@@ -199,8 +240,12 @@ class Game():
 
             if self.jeffy.life <= 0:
                 self.jeffy.kill()
+                if self.jeffy.death == False and self.jony.death == False:
+                    pg.mixer.Sound.play(self.death_sound)
                 self.jeffy.death = True
                 self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Død " + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
+                if self.duel and self.winner1 == False:
+                    self.winner2 = True
 
             if hits2 and self.jony.hurtTimer <= 0 and self.jony.death == False:
                 self.jony.life -=1
@@ -210,8 +255,12 @@ class Game():
 
             if self.jony.life <= 0:
                 self.jony.kill()
+                if self.jony.death == False and self.jeffy.death == False:
+                    pg.mixer.Sound.play(self.death_sound)
                 self.jony.death = True
                 self.text_hp2 = self.SANS_Undertale30.render("Johnny: Død " + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
+                if self.duel and self.winner2 == False:
+                    self.winner1 = True
 
             if self.jeffy.death and self.jony.death:
                 playing = False
@@ -219,6 +268,7 @@ class Game():
                     self.jeffy_poeng = 0
                 if self.jony_poeng < 0:
                     self.jony_poeng = 0
+                pg.mixer.Sound.play(self.end_sound)
                 self.start()
 
             if poeng1:
@@ -276,6 +326,8 @@ class Game():
 
             if bush_hit:
                 pg.mixer.Sound.play(self.bush_sound)
+            if eple_hit:
+                pg.mixer.Sound.play(self.apple_sound)
 
             self.all_sprites.draw(self.screen)
             self.screen.blit(self.kant,(0,0))

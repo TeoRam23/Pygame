@@ -2,7 +2,7 @@ import pygame as pg
 from random import randint
 vec = pg.math.Vector2
 
-WIDTH = 901
+WIDTH = 900
 HEIGHT = int(WIDTH/9*8)
 
 
@@ -219,7 +219,7 @@ class Player(pg.sprite.Sprite):
             if self.last_direct == 2:
                 self.hurtRight = True
                 self.hurt = False
-        if self.oldlife == self.life and self.hurtTimer > 60:
+        if self.oldlife == self.life and self.hurtTimer > 80:
             self.hurt = False
             self.hurtRight = False
             self.hurtTimer = 0
@@ -763,7 +763,7 @@ class Ranged_attack2(pg.sprite.Sprite):
  
     def update(self):
         self.rect.center = self.pos
-        self.angle += self.angle_speed
+        self.angle -= self.angle_speed
         self.pos.x += self.direction_x
         self.pos.y += self.direction_y
 
