@@ -71,16 +71,23 @@ bushGull2_img = pg.image.load("BuskGull2.png")
 bushGull2_img = pg.transform.scale(bushGull2_img,(bush_width, bush_height ))
 
 
-
 tre_img = pg.image.load("Tre.png")
 tre_img = pg.transform.scale(tre_img,(tre_width, tre_height))
 
 tre2_img = pg.image.load("Tre2.png")
 tre2_img = pg.transform.scale(tre2_img,(tre_width, tre_height))
 
+treGull_img = pg.image.load("TreGull.png")
+treGull_img = pg.transform.scale(treGull_img,(tre_width, tre_height))
+
+treGull2_img = pg.image.load("TreGull2.png")
+treGull2_img = pg.transform.scale(treGull2_img,(tre_width, tre_height))
+
 eple_img = pg.image.load("Eple.png")
 eple_img = pg.transform.scale(eple_img,(36,36))
 
+epleGull_img = pg.image.load("EpleGull.png")
+epleGull_img = pg.transform.scale(epleGull_img,(36,36))
 
 
 player_speed = 4
@@ -532,8 +539,10 @@ class EnemyBush(pg.sprite.Sprite):
         elif self.rand == 5:
             self.pos == self.pos
             if self.walkcount == 49:
-                self.mat = randint(1,20)
-                if self.mat == 1:
+                self.mat = randint(1,40)
+                if self.mat <= 2 and self.game.harder == False:
+                    self.summon()
+                if self.mat == 1 and self.game.harder == True:
                     self.summon()
 
 
@@ -563,8 +572,9 @@ class EnemyBush(pg.sprite.Sprite):
     
 
 class EnemyBushGull(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, game):
         pg.sprite.Sprite.__init__(self)
+        self.game = game
 
         self.current_frame = 0
         self.last_update = 0
@@ -585,7 +595,10 @@ class EnemyBushGull(pg.sprite.Sprite):
 
         self.rect =self.image.get_rect()
         self.rect.center = self.pos
-        self.speed = 1
+        if self.game.harder == False:
+            self.speed = 1
+        if self.game.harder:
+            self.speed = 1.25
         self.walk = True
         self.walkcount = 0
 
@@ -613,14 +626,17 @@ class EnemyBushGull(pg.sprite.Sprite):
 
 
 class EnemyTre(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         pg.sprite.Sprite.__init__(self)
         self.current_frame = 0
         self.last_update = 0
 
         self.wiggle = True
+        self.gull =  False
 
         self.wiggle_frames = [tre_img, tre2_img]
+        self.gull_frames = [treGull_img, treGull2_img]
 
         self.image = tre_img
 
@@ -630,13 +646,10 @@ class EnemyTre(pg.sprite.Sprite):
 
     def update(self):
         self.animate()
-
+        if self.game.harder:
+            self.wiggle = False
+            self.gull = True
         self.rect.center = self.pos
-
-    
-    def attack(self):
-        pass
-   
    
     def animate(self):
         now = pg.time.get_ticks()
@@ -647,13 +660,34 @@ class EnemyTre(pg.sprite.Sprite):
                 self.current_frame = (self.current_frame + 1)% len(self.wiggle_frames)
                 self.image = self.wiggle_frames[self.current_frame]
                 self.rect = self.image.get_rect()
-
+        
+        if self.gull:
+            if now - self.last_update > 150:
+                self.last_update = now
+                self.current_frame = (self.current_frame + 1)% len(self.gull_frames)
+                self.image = self.gull_frames[self.current_frame]
+                self.rect = self.image.get_rect()
 
 
 class BadEple(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         pg.sprite.Sprite.__init__(self)
-        self.image = eple_img
+        if self.game.harder == False:
+            self.image = eple_img
+            self.angle_speed = randint(-3,3)
+            if self.angle_speed == 0:
+                self.angle_speed = 1
+
+        if self.game.harder:
+            self.image = epleGull_img
+            self.angle_speed1 = randint(1,2)
+            if self.angle_speed1 == 1:
+                self.angle_speed = randint(3,6)
+            if self.angle_speed1 == 2:
+                self.angle_speed = randint(-6,-3)
+
+
         self.orig_img = self.image
 
         self.rect = self.image.get_rect()
@@ -663,9 +697,7 @@ class BadEple(pg.sprite.Sprite):
         self.direct = randint(1,8)
         self.direction = 1
         self.angle = 0
-        self.angle_speed = randint(-3,3)
-        if self.angle_speed == 0:
-            self.angle_speed = 1
+        
 
         self.wait = 0
 
