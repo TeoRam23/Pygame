@@ -84,6 +84,7 @@ class Game():
             
             self.screen.blit(self.start_screen,(0,0))
 
+            # viser poeng etter en runde
             if self.show_poeng:
                 if self.winner1:
                     self.score_board1 = self.SANS_Undertale30.render("W|Jeffrey poeng: " + str(self.jeffy_poeng), False, (self.RED))
@@ -98,6 +99,7 @@ class Game():
                 self.screen.blit(self.score_board1, (WIDTH/3,HEIGHT/2+100))
                 self.screen.blit(self.score_board2, (WIDTH/3,HEIGHT/2+150))
             
+            # viser kontroller når man først starter opp
             if self.show_poeng == False:
                 self.score_board1 = self.SANS_Undertale30.render("Jeffrey kontroll: WASD | F = skyt ball", False, (self.RED))
                 self.score_board2 = self.SANS_Undertale30.render("Johnny kontroll: piltaster | ctrlR = shyt ball", False, (self.BLUE))
@@ -175,6 +177,7 @@ class Game():
                 if event.type == pg.QUIT:
                     self.playing = False
 
+                # resetter spillet
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_r:
                         self.playing = False
@@ -200,6 +203,7 @@ class Game():
 
             self.all_sprites.update()
 
+            # alle kollisjons detektorene
             hits = pg.sprite.spritecollide(self.jeffy, self.hurt_group,False)
             hits2 = pg.sprite.spritecollide(self.jony, self.hurt_group,False)
             food_hit = pg.sprite.spritecollide(self.jeffy, self.food_group, True)
@@ -245,13 +249,13 @@ class Game():
                 self.jony_poeng += 10
                 pg.mixer.Sound.play(self.eat_sound)
                 self.text_hp2 = self.SANS_Undertale30.render("Johnny: Liv " + str(self.jony.life) + "|Poeng " + str(self.jony_poeng), False, (self.BLUE))
-            # når jeffrey blir truffet og hurt timeren er på 0 og Jeffrey ikke er død
+            # når jeffrey skader seg og hurt timeren er på 0 og Jeffrey ikke er død
             if hits and self.jeffy.hurtTimer <= 0 and self.jeffy.death == False:
                 self.jeffy.life -= 1
                 self.jeffy_poeng -= 5
                 pg.mixer.Sound.play(self.hurt_sound)
                 self.text_hp1 = self.SANS_Undertale30.render("Jeffrey: Liv " + str(self.jeffy.life) + "|Poeng " + str(self.jeffy_poeng), False, (self.RED))
-
+            # får jeffrey til å dø uten og setter en variabel som gjør at han ikke kan gjøre noe
             if self.jeffy.life <= 0:
                 self.jeffy.kill()
                 if self.jeffy.death == False and self.jony.death == False:

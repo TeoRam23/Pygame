@@ -646,6 +646,7 @@ class EnemyTre(pg.sprite.Sprite):
 
     def update(self):
         self.animate()
+        # hvis hardere modus er på blir det gyllent
         if self.game.harder:
             self.wiggle = False
             self.gull = True
@@ -678,7 +679,9 @@ class BadEple(pg.sprite.Sprite):
             self.angle_speed = randint(-3,3)
             if self.angle_speed == 0:
                 self.angle_speed = 1
+            self.speed = 2
 
+        # hvis hardere modus er på gjør eplet noe litt annet
         if self.game.harder:
             self.image = epleGull_img
             self.angle_speed1 = randint(1,2)
@@ -686,14 +689,14 @@ class BadEple(pg.sprite.Sprite):
                 self.angle_speed = randint(3,6)
             if self.angle_speed1 == 2:
                 self.angle_speed = randint(-6,-3)
-
+            self.speed = 2.25
 
         self.orig_img = self.image
 
         self.rect = self.image.get_rect()
         self.pos = vec(WIDTH/2, HEIGHT/2+tre_height/4)
         self.rect.center = self.pos
-        self.speed = 2
+        # velger retning
         self.direct = randint(1,8)
         self.direction = 1
         self.angle = 0
@@ -706,7 +709,7 @@ class BadEple(pg.sprite.Sprite):
         self.angle += self.angle_speed
 
         self.image, self.rect = self.rot_center(self.orig_img, self.angle, self.pos.x, self.pos.y)
-
+        # bestemmer hvor vilken retning er
         if self.direct == 1:
             self.pos.y -= self.speed/1.5
             self.pos.x += self.speed/1.5
@@ -727,7 +730,7 @@ class BadEple(pg.sprite.Sprite):
             self.pos.x -= self.speed/1.5
         if self.direct == 8:
             self.pos.y -= self.speed
-
+        # fjerner eplet hvis det er utenfor skjermen
         if self.pos.x > WIDTH+30 or self.pos.x < -30:
             self.kill()
         if self.pos.y > HEIGHT+30 or self.pos.y < -30:
